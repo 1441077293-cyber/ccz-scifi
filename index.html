@@ -54,7 +54,7 @@
   }
 
   body {
-    overflow: hidden;
+    overflow-x: hidden;
     letter-spacing: .01em;
   }
 
@@ -80,8 +80,7 @@
     position: relative;
     z-index: 1;
     min-height: 100svh;
-    padding: 24px;
-    overflow: hidden;
+    padding: 16px;
     isolation: isolate;
   }
 
@@ -255,11 +254,11 @@
     position: relative;
     z-index: 10;
     display: grid;
-    grid-template-columns: minmax(320px, .86fr) minmax(380px, 1.04fr) minmax(290px, .72fr);
-    gap: 20px;
+    grid-template-columns: minmax(260px, .78fr) minmax(300px, 1fr) minmax(220px, .66fr);
+    gap: 14px;
     align-items: stretch;
-    min-height: calc(100svh - 106px);
-    padding-top: 24px;
+    min-height: calc(100svh - 90px);
+    padding-top: 16px;
   }
 
   .hero,
@@ -1040,29 +1039,36 @@
     50% { filter: saturate(1.7) brightness(1.22); }
   }
 
-  @media (max-width: 1180px) {
-    body {
-      overflow: auto;
-    }
-
+  @media (max-width: 1300px) {
     .layout {
-      grid-template-columns: 1fr 1fr;
-      min-height: auto;
-      padding-bottom: 82px;
+      grid-template-columns: minmax(240px, .8fr) minmax(280px, 1fr) minmax(200px, .65fr);
+      gap: 12px;
     }
-
-    .hero {
-      grid-column: 1 / -1;
-      min-height: 470px;
-    }
-
-    .center-stage,
-    .right-rail {
-      min-height: 540px;
-    }
+    .world-shell { padding: 12px; }
+    h1 { font-size: clamp(36px, 5vw, 64px); }
+    .hero-copy { font-size: 14px; }
   }
 
-  @media (max-width: 780px) {
+  @media (max-width: 1050px) {
+    body { overflow-y: auto; }
+    .world-shell { overflow: visible; padding: 14px; }
+    .layout {
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      min-height: auto;
+      padding-bottom: 70px;
+    }
+    .hero { grid-column: 1 / -1; min-height: auto; padding: 22px; }
+    .center-stage, .right-rail { min-height: auto; }
+    .right-rail { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .status-strip { grid-column: 1 / -1; }
+    .ticker { position: fixed; left: 14px; right: 14px; bottom: 10px; }
+    .brand-subtitle { display: none; }
+    .callout { display: none; }
+    .holo { width: 300px; }
+  }
+
+  @media (max-width: 700px) {
     .world-shell {
       padding: 14px;
       overflow: visible;
