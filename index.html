@@ -460,6 +460,34 @@
     pointer-events: none;
   }
 
+  .project-showcase {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .project-showcase img {
+    max-width: 82%;
+    max-height: 68%;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 0 42px rgba(0,234,255,.1);
+    object-fit: contain;
+  }
+  .showcase-caption {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: .06em;
+  }
+  .holo {
+    transition: opacity .5s ease, transform .5s ease;
+  }
+
   .center-stage::after {
     content: "";
     position: absolute;
@@ -1137,11 +1165,15 @@
     </article>
 
     <section class="center-stage" id="mission" aria-label="科幻世界核心视觉">
-      <div class="holo" aria-hidden="true">
+      <div class="holo" id="holoCore" aria-hidden="true">
         <span class="orbit"></span>
         <span class="orbit"></span>
         <span class="orbit"></span>
         <span class="planet"></span>
+      </div>
+      <div class="project-showcase" id="projectShowcase">
+        <img id="showcaseImg" src="" alt="" style="display:none;">
+        <span class="showcase-caption" id="showcaseCaption"></span>
       </div>
       <button class="node is-active" type="button" data-node="profile" aria-label="打开星际档案">01</button>
       <button class="node" type="button" data-node="craft" aria-label="打开创作引擎">02</button>
@@ -1209,7 +1241,6 @@
         <p id="consoleBody">
           CCZ 的个人网站被设计成一座深空前哨站：来访者不是阅读一张静态名片，而是在控制台里探索你的审美、技术和想象力。
         </p>
-        <div class="console-preview" id="consolePreview"></div>
         <div class="console-data">
           <div class="data-tile">
             <span>Style</span>
@@ -1562,8 +1593,25 @@
     document.getElementById("coreValue").textContent = data.core;
     document.getElementById("signalValue").textContent = data.signal;
     document.getElementById("modeValue").textContent = data.mode;
-    const preview = document.getElementById("consolePreview");
-    if (preview) preview.innerHTML = data.img || "";
+    const showcaseImg = document.getElementById("showcaseImg");
+    const showcaseCaption = document.getElementById("showcaseCaption");
+    const holoCore = document.getElementById("holoCore");
+    if (data.img && data.img.trim()) {
+      // Extract src from img tag
+      const srcMatch = data.img.match(/src="([^"]+)"/);
+      const capMatch = data.img.match(/▲ (.+?)(?:<|$)/);
+      showcaseImg.src = srcMatch ? srcMatch[1] : '';
+      showcaseImg.style.display = 'block';
+      showcaseCaption.textContent = capMatch ? capMatch[1] : '';
+      showcaseCaption.style.display = 'block';
+      holoCore.style.opacity = '0.15';
+      holoCore.style.transform = 'scale(0.4)';
+    } else {
+      showcaseImg.style.display = 'none';
+      showcaseCaption.style.display = 'none';
+      holoCore.style.opacity = '1';
+      holoCore.style.transform = 'scale(1)';
+    }
 
     panelButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.panel === key));
     nodes.forEach(node => node.classList.toggle("is-active", node.dataset.node === key));
