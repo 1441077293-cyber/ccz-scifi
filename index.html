@@ -1793,19 +1793,27 @@
     window.setTimeout(() => showStep(0), 600);
   }
 
-  // Add a "?" button to restart tour
-  const restartBtn = document.createElement('button');
-  restartBtn.textContent = '?';
-  restartBtn.style.cssText = 'position:fixed;z-index:85;bottom:20px;right:20px;width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:rgba(4,14,32,.8);color:var(--accent);font-size:16px;font-weight:800;cursor:pointer;backdrop-filter:blur(10px);pointer-events:auto;';
-  restartBtn.title = '重新播放引导';
-  restartBtn.addEventListener('click', () => {
-    try { localStorage.removeItem('ccz-tour-done'); } catch(e) {}
-    startTour();
-  });
-  document.body.appendChild(restartBtn);
+  // Always show "?" restart button
+  function ensureRestartBtn() {
+    if (document.getElementById('tourRestartBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'tourRestartBtn';
+    btn.textContent = '?';
+    btn.style.cssText = 'position:fixed;z-index:85;bottom:20px;right:20px;width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:rgba(4,14,32,.8);color:var(--accent);font-size:16px;font-weight:800;cursor:pointer;backdrop-filter:blur(10px);pointer-events:auto;';
+    btn.title = '重新播放引导';
+    btn.addEventListener('click', () => {
+      try { localStorage.removeItem('ccz-tour-done'); } catch(e) {}
+      startTour();
+    });
+    document.body.appendChild(btn);
+  }
+  ensureRestartBtn();
 
-  // Auto-start tour on first visit
-  window.setTimeout(startTour, 1200);
+  // Auto-start tour on first visit (only if not done before)
+  window.setTimeout(() => {
+    try { if (!localStorage.getItem('ccz-tour-done')) startTour(); } catch(e) { startTour(); }
+    ensureRestartBtn();
+  }, 1200);
 
   resize();
   requestAnimationFrame(draw);
