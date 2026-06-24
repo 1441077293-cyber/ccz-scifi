@@ -460,32 +460,90 @@
     pointer-events: none;
   }
 
-  .project-showcase {
+  .holo {
+    transition: opacity .45s ease, transform .45s ease, filter .45s ease;
+  }
+  .holo.is-dimmed {
+    opacity: .12;
+    filter: blur(6px);
+  }
+
+  .showcase-card {
     position: absolute;
-    inset: 0;
+    inset: 20px;
     z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 14px;
+    padding: 20px;
+    opacity: 0;
     pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity .4s ease, transform .4s ease;
   }
-  .project-showcase img {
-    max-width: 82%;
-    max-height: 68%;
+  .showcase-card.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .showcase-frame {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 90%;
+    max-height: 58%;
+    border: 1px solid var(--line);
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,.12);
-    box-shadow: 0 0 42px rgba(0,234,255,.1);
+    overflow: hidden;
+    background: rgba(2,8,20,.72);
+    box-shadow: 0 0 32px rgba(0,234,255,.08);
+  }
+  .showcase-frame img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
   }
-  .showcase-caption {
-    margin-top: 10px;
+  .showcase-label {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(0,0,0,.6);
+    color: var(--accent);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    border: 1px solid rgba(255,255,255,.1);
+  }
+
+  .showcase-info {
+    text-align: center;
+    max-width: 480px;
+  }
+  .showcase-info h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: .04em;
+  }
+  .showcase-info p {
+    margin: 6px 0 0;
     color: var(--muted);
     font-size: 12px;
-    letter-spacing: .06em;
+    line-height: 1.55;
   }
-  .holo {
-    transition: opacity .5s ease, transform .5s ease;
+  .showcase-info .btn {
+    margin-top: 8px;
+    font-size: 12px;
+    min-height: 36px;
+    padding: 8px 16px;
   }
 
   .center-stage::after {
@@ -779,13 +837,6 @@
     line-height: 1.75;
   }
 
-  .console-preview {
-    margin-top: 4px;
-  }
-  .console-preview img {
-    max-height: 240px;
-    object-fit: contain;
-  }
 
   .console-data {
     display: grid;
@@ -1171,9 +1222,16 @@
         <span class="orbit"></span>
         <span class="planet"></span>
       </div>
-      <div class="project-showcase" id="projectShowcase">
-        <img id="showcaseImg" src="" alt="" style="display:none;">
-        <span class="showcase-caption" id="showcaseCaption"></span>
+      <div class="showcase-card" id="showcaseCard">
+        <div class="showcase-frame">
+          <img id="showcaseImg" src="" alt="">
+          <span class="showcase-label">PROJECT PREVIEW</span>
+        </div>
+        <div class="showcase-info">
+          <h3 id="showcaseTitle"></h3>
+          <p id="showcaseDesc"></p>
+          <a id="showcaseLink" href="#" target="_blank" class="btn" style="display:inline-flex;margin-top:4px;"></a>
+        </div>
       </div>
       <button class="node is-active" type="button" data-node="profile" aria-label="打开星际档案">01</button>
       <button class="node" type="button" data-node="craft" aria-label="打开创作引擎">02</button>
@@ -1407,7 +1465,7 @@
       core: "99%",
       signal: "CCZ",
       mode: "在线",
-      img: ""
+      showcase: null
     },
     craft: {
       kicker: "Module 02 / Creative Engine",
@@ -1418,7 +1476,13 @@
       core: "3+",
       signal: "AI",
       mode: "创作",
-      img: '<img src="img-typeplus.png" alt="TypePlus" style="width:100%;border-radius:8px;margin-top:10px;"><p style="font-size:11px;color:var(--dim);margin:6px 0 0;">▲ TypePlus 汽车服务体验平台原型</p>'
+      showcase: {
+        title: "TypePlus 汽车服务体验平台",
+        desc: "面向城市车主的完整服务闭环：预约 → 到店 → 追踪 → 交付 → 反馈。Lovable 搭建，已公开部署。",
+        img: "img-typeplus.png",
+        link: "https://mtyre-platformichelin.lovable.app/",
+        linkText: "在线体验 TypePlus"
+      }
     },
     map: {
       kicker: "Module 03 / Project Star Map",
@@ -1429,7 +1493,13 @@
       core: "6",
       signal: "MAP",
       mode: "展示",
-      img: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;"><img src="img-ideanav.png" style="width:100%;border-radius:6px;"><img src="img-tesla.png" style="width:100%;border-radius:6px;"></div><p style="font-size:11px;color:var(--dim);margin:6px 0 0;">▲ Idea Navigator + Tesla 社区活动物料</p>'
+      showcase: {
+        title: "Idea Navigator 决策平台",
+        desc: "创业项目可行性评分平台，多指标体系 + 市场风险分析 + 下一步行动建议。Lovable 搭建，已公开部署。",
+        img: "img-ideanav.png",
+        link: "https://idea-aura.lovable.app",
+        linkText: "在线体验 Idea Navigator"
+      }
     },
     contact: {
       kicker: "Module 04 / Contact Beacon",
@@ -1440,7 +1510,13 @@
       core: "ON",
       signal: "OPEN",
       mode: "连接",
-      img: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;"><img src="img-bi.png" style="width:100%;border-radius:6px;"><img src="img-muji.png" style="width:100%;border-radius:6px;"></div><p style="font-size:11px;color:var(--dim);margin:6px 0 0;">▲ 米其林 BI 报表 + MUJI×UNHCR 商业策划 PPT</p>'
+      showcase: {
+        title: "米其林 BI 报表 & MUJI 商业策划",
+        desc: "平台业务 BI 报表分析（门店/订单/销售/库存）+ MUJI×UNHCR 公益品牌营销策划 PPT。",
+        img: "img-bi.png",
+        link: "https://github.com/1441077293-cyber",
+        linkText: "访问 GitHub 主页"
+      }
     }
   };
 
@@ -1593,24 +1669,23 @@
     document.getElementById("coreValue").textContent = data.core;
     document.getElementById("signalValue").textContent = data.signal;
     document.getElementById("modeValue").textContent = data.mode;
-    const showcaseImg = document.getElementById("showcaseImg");
-    const showcaseCaption = document.getElementById("showcaseCaption");
-    const holoCore = document.getElementById("holoCore");
-    if (data.img && data.img.trim()) {
-      // Extract src from img tag
-      const srcMatch = data.img.match(/src="([^"]+)"/);
-      const capMatch = data.img.match(/▲ (.+?)(?:<|$)/);
-      showcaseImg.src = srcMatch ? srcMatch[1] : '';
-      showcaseImg.style.display = 'block';
-      showcaseCaption.textContent = capMatch ? capMatch[1] : '';
-      showcaseCaption.style.display = 'block';
-      holoCore.style.opacity = '0.15';
-      holoCore.style.transform = 'scale(0.4)';
+    const card = document.getElementById("showcaseCard");
+    const img = document.getElementById("showcaseImg");
+    const title = document.getElementById("showcaseTitle");
+    const desc = document.getElementById("showcaseDesc");
+    const link = document.getElementById("showcaseLink");
+    const holo = document.getElementById("holoCore");
+    if (data.showcase) {
+      img.src = data.showcase.img;
+      title.textContent = data.showcase.title;
+      desc.textContent = data.showcase.desc;
+      link.href = data.showcase.link;
+      link.textContent = data.showcase.linkText;
+      card.classList.add("is-visible");
+      holo.classList.add("is-dimmed");
     } else {
-      showcaseImg.style.display = 'none';
-      showcaseCaption.style.display = 'none';
-      holoCore.style.opacity = '1';
-      holoCore.style.transform = 'scale(1)';
+      card.classList.remove("is-visible");
+      holo.classList.remove("is-dimmed");
     }
 
     panelButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.panel === key));
