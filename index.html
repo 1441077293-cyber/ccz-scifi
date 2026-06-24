@@ -1522,9 +1522,9 @@
 
   panelButtons.forEach(btn => btn.addEventListener("click", event => activate(btn.dataset.panel, event)));
   nodes.forEach(node => node.addEventListener("click", event => activate(node.dataset.node, event)));
-  launchBtn.addEventListener("click", launch);
-  focusBtn.addEventListener("click", focusCore);
-  themeBtn.addEventListener("click", cycleTheme);
+  if (launchBtn) launchBtn.addEventListener("click", launch);
+  if (focusBtn) focusBtn.addEventListener("click", focusCore);
+  if (themeBtn) themeBtn.addEventListener("click", cycleTheme);
 
   resize();
   requestAnimationFrame(draw);
