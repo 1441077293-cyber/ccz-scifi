@@ -751,6 +751,14 @@
     line-height: 1.75;
   }
 
+  .console-preview {
+    margin-top: 4px;
+  }
+  .console-preview img {
+    max-height: 240px;
+    object-fit: contain;
+  }
+
   .console-data {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1201,6 +1209,7 @@
         <p id="consoleBody">
           CCZ 的个人网站被设计成一座深空前哨站：来访者不是阅读一张静态名片，而是在控制台里探索你的审美、技术和想象力。
         </p>
+        <div class="console-preview" id="consolePreview"></div>
         <div class="console-data">
           <div class="data-tile">
             <span>Style</span>
@@ -1366,7 +1375,8 @@
       state: "可交互 · 开放连接",
       core: "99%",
       signal: "CCZ",
-      mode: "在线"
+      mode: "在线",
+      img: ""
     },
     craft: {
       kicker: "Module 02 / Creative Engine",
@@ -1376,7 +1386,8 @@
       state: "多项目运行中",
       core: "3+",
       signal: "AI",
-      mode: "创作"
+      mode: "创作",
+      img: '<img src="img-typeplus.png" alt="TypePlus" style="width:100%;border-radius:8px;margin-top:10px;"><p style="font-size:11px;color:var(--dim);margin:6px 0 0;">▲ TypePlus 汽车服务体验平台原型</p>'
     },
     map: {
       kicker: "Module 03 / Project Star Map",
@@ -1386,7 +1397,8 @@
       state: "持续更新",
       core: "6",
       signal: "MAP",
-      mode: "展示"
+      mode: "展示",
+      img: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;"><img src="img-ideanav.png" style="width:100%;border-radius:6px;"><img src="img-tesla.png" style="width:100%;border-radius:6px;"></div><p style="font-size:11px;color:var(--dim);margin:6px 0 0;">▲ Idea Navigator + Tesla 社区活动物料</p>'
     },
     contact: {
       kicker: "Module 04 / Contact Beacon",
@@ -1396,7 +1408,8 @@
       state: "等待连接",
       core: "ON",
       signal: "OPEN",
-      mode: "连接"
+      mode: "连接",
+      img: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;"><img src="img-bi.png" style="width:100%;border-radius:6px;"><img src="img-muji.png" style="width:100%;border-radius:6px;"></div><p style="font-size:11px;color:var(--dim);margin:6px 0 0;">▲ 米其林 BI 报表 + MUJI×UNHCR 商业策划 PPT</p>'
     }
   };
 
@@ -1549,6 +1562,8 @@
     document.getElementById("coreValue").textContent = data.core;
     document.getElementById("signalValue").textContent = data.signal;
     document.getElementById("modeValue").textContent = data.mode;
+    const preview = document.getElementById("consolePreview");
+    if (preview) preview.innerHTML = data.img || "";
 
     panelButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.panel === key));
     nodes.forEach(node => node.classList.toggle("is-active", node.dataset.node === key));
@@ -1815,6 +1830,8 @@
     ensureRestartBtn();
   }, 1200);
 
+  // Show craft module preview by default
+  activate("craft");
   resize();
   requestAnimationFrame(draw);
 })();
