@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCZ 的科幻世界</title>
+<style>
+  :root {
+    --bg: #030512;
+    --panel: rgba(7, 16, 34, .64);
+    --panel-strong: rgba(10, 24, 48, .82);
+    --line: rgba(120, 240, 255, .24);
+    --line-hot: rgba(0, 234, 255, .62);
+    --text: #eefaff;
+    --muted: rgba(218, 243, 255, .66);
+    --dim: rgba(218, 243, 255, .4);
+    --accent: #00eaff;
+    --accent-2: #9b5cff;
+    --accent-3: #ffcf5a;
+    --danger: #ff477e;
+    --radius: 8px;
+    --shadow: 0 0 40px rgba(0, 234, 255, .16);
+    color-scheme: dark;
+  }
+
+  [data-theme="nova"] {
+    --accent: #ffcf5a;
+    --accent-2: #ff477e;
+    --accent-3: #7cffd7;
+    --line: rgba(255, 207, 90, .24);
+    --line-hot: rgba(255, 207, 90, .64);
+    --shadow: 0 0 42px rgba(255, 207, 90, .16);
+  }
+
+  [data-theme="matrix"] {
+    --accent: #7cffd7;
+    --accent-2: #00eaff;
+    --accent-3: #9b5cff;
+    --line: rgba(124, 255, 215, .22);
+    --line-hot: rgba(124, 255, 215, .62);
+    --shadow: 0 0 42px rgba(124, 255, 215, .14);
+  }
+
+  * { box-sizing: border-box; }
+
+  html,
+  body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  body {
+    overflow: hidden;
+    letter-spacing: .01em;
+  }
+
+  button,
+  a {
+    font: inherit;
+  }
+
+  button {
+    color: inherit;
+  }
+
+  #starfield {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .world-shell {
+    position: relative;
+    z-index: 1;
+    min-height: 100svh;
+    padding: 24px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .world-shell::before,
+  .world-shell::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .world-shell::before {
+    z-index: -2;
+    background:
+      radial-gradient(circle at 67% 38%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 24%),
+      radial-gradient(circle at 24% 68%, color-mix(in srgb, var(--accent-2) 20%, transparent), transparent 28%),
+      linear-gradient(115deg, rgba(2, 5, 18, .42), rgba(2, 7, 18, .94) 58%, rgba(2, 2, 10, .72));
+  }
+
+  .world-shell::after {
+    z-index: 40;
+    background:
+      linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .018) 1px, transparent 1px),
+      repeating-linear-gradient(0deg, transparent 0, transparent 5px, rgba(255, 255, 255, .018) 6px);
+    background-size: 88px 88px, 88px 88px, 100% 8px;
+    mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 84%, transparent 100%);
+    opacity: .58;
+    mix-blend-mode: screen;
+  }
+
+  .topbar {
+    position: relative;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    height: 58px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .brand-mark {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line-hot);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, color-mix(in srgb, var(--accent) 28%, transparent), transparent 58%),
+      rgba(2, 10, 22, .72);
+    box-shadow: var(--shadow), inset 0 0 18px color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .1em;
+  }
+
+  .brand-mark::before,
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: orbitMark 9s linear infinite;
+  }
+
+  .brand-mark::after {
+    inset: 6px;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    animation-duration: 5s;
+    animation-direction: reverse;
+  }
+
+  .brand-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .brand-title {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .brand-subtitle {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 999px;
+    background: rgba(2, 8, 20, .42);
+    backdrop-filter: blur(18px);
+  }
+
+  .nav a,
+  .nav button {
+    position: relative;
+    border: 0;
+    border-radius: 999px;
+    padding: 9px 13px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+
+  .nav a:hover,
+  .nav button:hover,
+  .nav a:focus-visible,
+  .nav button:focus-visible {
+    outline: 0;
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  .signal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(3, 10, 24, .58);
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, .32);
+  }
+
+  .signal-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 16px var(--accent);
+    animation: pulseDot 1.4s ease-in-out infinite;
+  }
+
+  .layout {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: minmax(320px, .86fr) minmax(380px, 1.04fr) minmax(290px, .72fr);
+    gap: 20px;
+    align-items: stretch;
+    min-height: calc(100svh - 106px);
+    padding-top: 24px;
+  }
+
+  .hero,
+  .console,
+  .module-panel,
+  .status-strip {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, .08), transparent 30%),
+      var(--panel);
+    box-shadow: var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, .035);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 580px;
+    padding: clamp(24px, 3vw, 40px);
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, var(--line-hot), transparent 34%) top left / 44% 1px no-repeat,
+      linear-gradient(90deg, transparent, var(--line-hot)) bottom right / 46% 1px no-repeat,
+      linear-gradient(var(--line-hot), transparent 34%) top left / 1px 42% no-repeat,
+      linear-gradient(transparent, var(--line-hot)) bottom right / 1px 42% no-repeat;
+    opacity: .82;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    margin: 0 0 20px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 999px;
+    color: var(--accent);
+    background: rgba(0, 0, 0, .18);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 18px var(--accent);
+    transform: rotate(45deg);
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 760px;
+    font-size: clamp(44px, 6vw, 92px);
+    line-height: .95;
+    letter-spacing: -.02em;
+  }
+
+  .gradient-text {
+    display: block;
+    color: transparent;
+    background: linear-gradient(100deg, #fff, var(--accent) 38%, var(--accent-2) 74%, #fff);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: textFlux 6s ease-in-out infinite;
+    text-shadow: 0 0 34px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  .hero-copy {
+    max-width: 620px;
+    margin: 20px 0 0;
+    color: var(--muted);
+    font-size: clamp(15px, 1.4vw, 18px);
+    line-height: 1.85;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 46px;
+    border: 1px solid var(--line-hot);
+    border-radius: 999px;
+    padding: 12px 18px;
+    background: color-mix(in srgb, var(--accent) 16%, rgba(4, 10, 24, .7));
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+
+  .btn::before {
+    content: "";
+    position: absolute;
+    inset: -70% -25%;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .32), transparent 70%);
+    transform: translateX(-60%);
+    transition: transform .55s ease;
+  }
+
+  .btn:hover,
+  .btn:focus-visible {
+    outline: 0;
+    transform: translateY(-2px);
+    box-shadow: 0 0 32px color-mix(in srgb, var(--accent) 28%, transparent);
+  }
+
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    transform: translateX(60%);
+  }
+
+  .btn-secondary {
+    border-color: rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .055);
+    color: var(--muted);
+  }
+
+  .micro-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .micro-card {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, .04);
+  }
+
+  .micro-label {
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .micro-value {
+    margin-top: 8px;
+    color: var(--accent);
+    font-size: clamp(18px, 2vw, 26px);
+    font-weight: 800;
+  }
+
+  .micro-note {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .center-stage {
+    position: relative;
+    min-height: 580px;
+    border: 1px solid rgba(255, 255, 255, .075);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(circle at center, color-mix(in srgb, var(--accent) 16%, transparent), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .015));
+    overflow: hidden;
+  }
+
+  .center-stage::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: var(--radius);
+    pointer-events: none;
+  }
+
+  .center-stage::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(62vw, 660px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      linear-gradient(90deg, transparent 49.7%, color-mix(in srgb, var(--accent) 46%, transparent) 50%, transparent 50.3%),
+      linear-gradient(0deg, transparent 49.7%, color-mix(in srgb, var(--accent) 32%, transparent) 50%, transparent 50.3%);
+    transform: translate(-50%, -50%);
+    opacity: .28;
+    animation: scanRotate 18s linear infinite;
+  }
+
+  .holo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(38vw, 440px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -48%);
+    display: grid;
+    place-items: center;
+  }
+
+  .planet {
+    position: relative;
+    width: 46%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .96), transparent 8%),
+      radial-gradient(circle at 38% 34%, color-mix(in srgb, var(--accent) 82%, #fff), transparent 19%),
+      radial-gradient(circle at 70% 76%, color-mix(in srgb, var(--accent-2) 58%, transparent), transparent 22%),
+      linear-gradient(135deg, color-mix(in srgb, var(--accent) 64%, #0b1932), #071029 54%, #02040d);
+    box-shadow:
+      0 0 42px color-mix(in srgb, var(--accent) 48%, transparent),
+      inset -28px -26px 50px rgba(0, 0, 0, .52),
+      inset 14px 12px 28px rgba(255, 255, 255, .12);
+    animation: planetFloat 5s ease-in-out infinite;
+  }
+
+  .planet::before,
+  .planet::after {
+    content: "";
+    position: absolute;
+    inset: -28%;
+    border: 1px solid color-mix(in srgb, var(--accent) 54%, transparent);
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-radius: 50%;
+    transform: rotateX(72deg) rotateZ(-12deg);
+  }
+
+  .planet::after {
+    inset: -46%;
+    border-color: color-mix(in srgb, var(--accent-2) 48%, transparent);
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    transform: rotateX(70deg) rotateZ(26deg);
+    animation: ringBlink 3.4s ease-in-out infinite;
+  }
+
+  .orbit {
+    position: absolute;
+    inset: 6%;
+    border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+    border-radius: 50%;
+    animation: orbitMark 28s linear infinite;
+  }
+
+  .orbit:nth-child(2) {
+    inset: 17%;
+    border-style: dashed;
+    animation-duration: 18s;
+    animation-direction: reverse;
+  }
+
+  .orbit:nth-child(3) {
+    inset: 29%;
+    opacity: .7;
+    animation-duration: 12s;
+  }
+
+  .node {
+    position: absolute;
+    z-index: 8;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line-hot);
+    border-radius: 50%;
+    background: rgba(2, 12, 26, .74);
+    color: var(--accent);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 30%, transparent);
+    cursor: pointer;
+    transition: transform .2s ease, background .2s ease;
+  }
+
+  .node:hover,
+  .node:focus-visible,
+  .node.is-active {
+    outline: 0;
+    transform: scale(1.08);
+    background: color-mix(in srgb, var(--accent) 18%, rgba(3, 12, 28, .86));
+  }
+
+  .node[data-node="profile"] { left: 18%; top: 24%; }
+  .node[data-node="craft"] { right: 18%; top: 22%; }
+  .node[data-node="map"] { left: 20%; bottom: 21%; }
+  .node[data-node="contact"] { right: 18%; bottom: 24%; }
+
+  .callout {
+    position: absolute;
+    z-index: 7;
+    min-width: 146px;
+    padding: 12px 13px;
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: var(--radius);
+    background: rgba(3, 10, 24, .68);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    backdrop-filter: blur(12px);
+  }
+
+  .callout strong {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text);
+    font-size: 13px;
+    letter-spacing: .1em;
+  }
+
+  .callout:nth-of-type(1) { left: 6%; top: 44%; }
+  .callout:nth-of-type(2) { right: 6%; top: 48%; }
+  .callout:nth-of-type(3) { left: 50%; bottom: 7%; transform: translateX(-50%); }
+
+  .right-rail {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 14px;
+    min-height: 580px;
+  }
+
+  .module-panel {
+    padding: 18px;
+  }
+
+  .panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+    color: var(--text);
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .panel-title small {
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  .module-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .module-btn {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    min-height: 68px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: var(--radius);
+    padding: 12px;
+    background: rgba(255, 255, 255, .04);
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+
+  .module-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 13%, transparent), transparent 52%);
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+
+  .module-btn:hover,
+  .module-btn:focus-visible,
+  .module-btn.is-active {
+    outline: 0;
+    transform: translateX(-2px);
+    border-color: var(--line-hot);
+    background: rgba(255, 255, 255, .065);
+  }
+
+  .module-btn:hover::before,
+  .module-btn:focus-visible::before,
+  .module-btn.is-active::before {
+    opacity: 1;
+  }
+
+  .module-index {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .module-copy {
+    position: relative;
+    min-width: 0;
+  }
+
+  .module-name {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .module-desc {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .module-arrow {
+    position: relative;
+    color: var(--accent);
+  }
+
+  .console {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  .console::before {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    top: 51px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line-hot), transparent);
+  }
+
+  .console-kicker {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .console h2 {
+    margin: 0;
+    font-size: clamp(24px, 2.4vw, 34px);
+    line-height: 1.12;
+  }
+
+  .console p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .console-data {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .data-tile {
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, .04);
+  }
+
+  .data-tile span {
+    display: block;
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .data-tile strong {
+    display: block;
+    margin-top: 7px;
+    color: var(--accent);
+    font-size: 18px;
+  }
+
+  .status-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    overflow: hidden;
+  }
+
+  .status-item {
+    padding: 14px 12px;
+    background: rgba(255, 255, 255, .035);
+  }
+
+  .status-item span {
+    display: block;
+    color: var(--dim);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .status-item strong {
+    display: block;
+    margin-top: 7px;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .ticker {
+    position: absolute;
+    z-index: 60;
+    left: 24px;
+    right: 24px;
+    bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 38px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 999px;
+    background: rgba(2, 8, 18, .62);
+    color: var(--muted);
+    overflow: hidden;
+    backdrop-filter: blur(14px);
+  }
+
+  .ticker-label {
+    flex: 0 0 auto;
+    padding: 0 16px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .ticker-track {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    animation: ticker 26s linear infinite;
+  }
+
+  .cursor {
+    position: fixed;
+    z-index: 80;
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: .75;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 44%, transparent);
+    mix-blend-mode: screen;
+  }
+
+  .cursor::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .burst {
+    position: fixed;
+    z-index: 75;
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: burst .7s ease-out forwards;
+  }
+
+  .spark {
+    position: fixed;
+    z-index: 75;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    pointer-events: none;
+    animation: spark .72s ease-out forwards;
+  }
+
+  .world-shell.is-warping .center-stage {
+    box-shadow: 0 0 80px color-mix(in srgb, var(--accent) 30%, transparent), inset 0 0 80px rgba(255, 255, 255, .05);
+  }
+
+  .world-shell.is-warping .planet {
+    animation: planetFloat .9s ease-in-out infinite, warpGlow .9s ease-in-out infinite;
+  }
+
+  .world-shell.is-warping .ticker-track {
+    animation-duration: 9s;
+  }
+
+  @keyframes orbitMark {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes pulseDot {
+    0%, 100% { opacity: .52; transform: scale(.85); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  @keyframes textFlux {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes scanRotate {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  @keyframes planetFloat {
+    0%, 100% { transform: translateY(-7px) rotate(-2deg); }
+    50% { transform: translateY(7px) rotate(2deg); }
+  }
+
+  @keyframes ringBlink {
+    0%, 100% { opacity: .45; }
+    50% { opacity: .95; }
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes burst {
+    to {
+      width: 220px;
+      height: 220px;
+      margin-left: -105px;
+      margin-top: -105px;
+      opacity: 0;
+    }
+  }
+
+  @keyframes spark {
+    to {
+      transform: translate(var(--dx), var(--dy)) scale(.1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes warpGlow {
+    0%, 100% { filter: saturate(1); }
+    50% { filter: saturate(1.7) brightness(1.22); }
+  }
+
+  @media (max-width: 1180px) {
+    body {
+      overflow: auto;
+    }
+
+    .layout {
+      grid-template-columns: 1fr 1fr;
+      min-height: auto;
+      padding-bottom: 82px;
+    }
+
+    .hero {
+      grid-column: 1 / -1;
+      min-height: 470px;
+    }
+
+    .center-stage,
+    .right-rail {
+      min-height: 540px;
+    }
+  }
+
+  @media (max-width: 780px) {
+    .world-shell {
+      padding: 14px;
+      overflow: visible;
+    }
+
+    .topbar {
+      height: auto;
+      align-items: flex-start;
+    }
+
+    .brand-subtitle,
+    .signal {
+      display: none;
+    }
+
+    .nav {
+      gap: 2px;
+      padding: 4px;
+    }
+
+    .nav a,
+    .nav button {
+      padding: 8px 9px;
+      font-size: 10px;
+      letter-spacing: .08em;
+    }
+
+    .layout {
+      grid-template-columns: 1fr;
+      gap: 14px;
+      padding-top: 16px;
+      padding-bottom: 70px;
+    }
+
+    .hero,
+    .center-stage,
+    .right-rail {
+      min-height: auto;
+    }
+
+    .hero {
+      padding: 22px;
+    }
+
+    h1 {
+      font-size: clamp(40px, 15vw, 64px);
+    }
+
+    .micro-grid,
+    .console-data,
+    .status-strip {
+      grid-template-columns: 1fr;
+    }
+
+    .center-stage {
+      min-height: 470px;
+    }
+
+    .holo {
+      width: 330px;
+      max-width: 86vw;
+    }
+
+    .callout {
+      display: none;
+    }
+
+    .ticker {
+      left: 14px;
+      right: 14px;
+      bottom: 10px;
+    }
+
+    .cursor {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="starfield" aria-hidden="true"></canvas>
+<main class="world-shell" id="shell" data-theme="void">
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="CCZ 的科幻世界首页">
+      <span class="brand-mark">CCZ</span>
+      <span class="brand-text">
+        <span class="brand-title">CCZ 的科幻世界</span>
+        <span class="brand-subtitle">Personal Sci-Fi Interface</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="主导航">
+      <a href="#world">世界</a>
+      <a href="#mission">任务</a>
+      <a href="#signal">信标</a>
+      <button type="button" id="themeBtn">换频段</button>
+    </nav>
+
+    <div class="signal" aria-label="系统状态">
+      <span class="signal-dot"></span>
+      <span>Live Orbit</span>
+    </div>
+  </header>
+
+  <section class="layout" id="top">
+    <article class="hero" id="world">
+      <div>
+        <p class="eyebrow">CCZ Universe / 展示模式</p>
+        <h1>
+          进入
+          <span class="gradient-text">CCZ 的科幻世界</span>
+        </h1>
+        <p class="hero-copy">
+          这里是一个属于 CCZ 的个人宇宙：灵感、作品、技术实验和未来叙事被封装成一座可交互的星际控制台。
+          点击右侧模块或中央能量节点，启动不同的探索路径。
+        </p>
+        <div class="hero-actions">
+          <button class="btn" type="button" id="launchBtn">启动探索协议</button>
+          <button class="btn btn-secondary" type="button" id="focusBtn">锁定能量核心</button>
+        </div>
+      </div>
+
+      <div class="micro-grid" aria-label="站点概览">
+        <div class="micro-card">
+          <span class="micro-label">Creative Core</span>
+          <strong class="micro-value" id="coreValue">99%</strong>
+          <span class="micro-note">创作反应堆在线</span>
+        </div>
+        <div class="micro-card">
+          <span class="micro-label">Signal</span>
+          <strong class="micro-value" id="signalValue">A-17</strong>
+          <span class="micro-note">深空信标同步</span>
+        </div>
+        <div class="micro-card">
+          <span class="micro-label">Mode</span>
+          <strong class="micro-value" id="modeValue">探索</strong>
+          <span class="micro-note">沉浸式展示开启</span>
+        </div>
+      </div>
+    </article>
+
+    <section class="center-stage" id="mission" aria-label="科幻世界核心视觉">
+      <div class="holo" aria-hidden="true">
+        <span class="orbit"></span>
+        <span class="orbit"></span>
+        <span class="orbit"></span>
+        <span class="planet"></span>
+      </div>
+      <button class="node is-active" type="button" data-node="profile" aria-label="打开星际档案">01</button>
+      <button class="node" type="button" data-node="craft" aria-label="打开创作引擎">02</button>
+      <button class="node" type="button" data-node="map" aria-label="打开作品星图">03</button>
+      <button class="node" type="button" data-node="contact" aria-label="打开联系信标">04</button>
+      <div class="callout">
+        <strong>Holo Core</strong>
+        CCZ 的数字星球正在同步创作轨道。
+      </div>
+      <div class="callout">
+        <strong>Orbit Nodes</strong>
+        每个节点代表一个可展示的个人模块。
+      </div>
+      <div class="callout">
+        <strong>UX Layer</strong>
+        鼠标、点击、键盘和移动端均有响应。
+      </div>
+    </section>
+
+    <aside class="right-rail" id="signal">
+      <section class="module-panel" aria-label="探索模块">
+        <div class="panel-title">
+          <span>Command Deck</span>
+          <small>4 Modules</small>
+        </div>
+        <div class="module-list">
+          <button class="module-btn is-active" type="button" data-panel="profile">
+            <span class="module-index">01</span>
+            <span class="module-copy">
+              <span class="module-name">星际档案</span>
+              <span class="module-desc">个人身份、审美方向和宇宙设定。</span>
+            </span>
+            <span class="module-arrow">↗</span>
+          </button>
+          <button class="module-btn" type="button" data-panel="craft">
+            <span class="module-index">02</span>
+            <span class="module-copy">
+              <span class="module-name">创作引擎</span>
+              <span class="module-desc">技术、设计、故事和互动体验。</span>
+            </span>
+            <span class="module-arrow">↗</span>
+          </button>
+          <button class="module-btn" type="button" data-panel="map">
+            <span class="module-index">03</span>
+            <span class="module-copy">
+              <span class="module-name">作品星图</span>
+              <span class="module-desc">用于展示项目、实验和未来计划。</span>
+            </span>
+            <span class="module-arrow">↗</span>
+          </button>
+          <button class="module-btn" type="button" data-panel="contact">
+            <span class="module-index">04</span>
+            <span class="module-copy">
+              <span class="module-name">联系信标</span>
+              <span class="module-desc">把访问者引导到合作与交流入口。</span>
+            </span>
+            <span class="module-arrow">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="console" aria-live="polite">
+        <span class="console-kicker" id="consoleKicker">Module 01 / Profile</span>
+        <h2 id="consoleTitle">星际档案已展开</h2>
+        <p id="consoleBody">
+          CCZ 的个人网站被设计成一座深空前哨站：来访者不是阅读一张静态名片，而是在控制台里探索你的审美、技术和想象力。
+        </p>
+        <div class="console-data">
+          <div class="data-tile">
+            <span>Style</span>
+            <strong id="dataStyle">高科技 / 深空</strong>
+          </div>
+          <div class="data-tile">
+            <span>UX State</span>
+            <strong id="dataState">可交互</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="status-strip" aria-label="系统读数">
+        <div class="status-item">
+          <span>Hull</span>
+          <strong>光学甲板</strong>
+        </div>
+        <div class="status-item">
+          <span>Engine</span>
+          <strong>脉冲在线</strong>
+        </div>
+        <div class="status-item">
+          <span>Access</span>
+          <strong>访客模式</strong>
+        </div>
+      </section>
+    </aside>
+  </section>
+
+  <div class="ticker" aria-label="实时日志">
+    <span class="ticker-label">Deep Space Log</span>
+    <span class="ticker-track" id="tickerTrack">
+      CCZ 宇宙链路建立中 · 星尘粒子稳定 · 视觉协议加载完成 · 交互节点待探索 · 深空信标持续广播 ·
+      CCZ 宇宙链路建立中 · 星尘粒子稳定 · 视觉协议加载完成 · 交互节点待探索 · 深空信标持续广播 ·
+    </span>
+  </div>
+</main>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const shell = document.getElementById("shell");
+  const canvas = document.getElementById("starfield");
+  const ctx = canvas.getContext("2d");
+  const cursor = document.getElementById("cursor");
+  const launchBtn = document.getElementById("launchBtn");
+  const focusBtn = document.getElementById("focusBtn");
+  const themeBtn = document.getElementById("themeBtn");
+  const panelButtons = Array.from(document.querySelectorAll(".module-btn"));
+  const nodes = Array.from(document.querySelectorAll(".node"));
+
+  const panels = {
+    profile: {
+      kicker: "Module 01 / Profile",
+      title: "星际档案已展开",
+      body: "CCZ 的个人网站被设计成一座深空前哨站：来访者不是阅读一张静态名片，而是在控制台里探索你的审美、技术和想象力。",
+      style: "高科技 / 深空",
+      state: "可交互",
+      core: "99%",
+      signal: "A-17",
+      mode: "探索"
+    },
+    craft: {
+      kicker: "Module 02 / Creative Engine",
+      title: "创作引擎正在升温",
+      body: "这里可以承载你的设计实验、代码作品、AI 创作、摄影影像或任何想被包装成未来展厅的内容。",
+      style: "赛博 HUD",
+      state: "引擎升温",
+      core: "114%",
+      signal: "C-42",
+      mode: "创作"
+    },
+    map: {
+      kicker: "Module 03 / Project Star Map",
+      title: "作品星图已校准",
+      body: "未来可以把每个作品变成一颗可点击星球：项目介绍、截图、链接和故事都能沿着轨道展开。",
+      style: "星图导航",
+      state: "轨道同步",
+      core: "87%",
+      signal: "M-09",
+      mode: "展示"
+    },
+    contact: {
+      kicker: "Module 04 / Contact Beacon",
+      title: "联系信标持续广播",
+      body: "合作、交流、社交账号或邮箱入口都可以接入这里，让访问者像接收深空讯号一样找到你。",
+      style: "信号塔",
+      state: "等待连接",
+      core: "76%",
+      signal: "S-01",
+      mode: "连接"
+    }
+  };
+
+  const themes = ["void", "nova", "matrix"];
+  let themeIndex = 0;
+  let width = 0;
+  let height = 0;
+  let dpr = 1;
+  let stars = [];
+  let comets = [];
+  let pointer = { x: innerWidth / 2, y: innerHeight / 2, tx: innerWidth / 2, ty: innerHeight / 2 };
+  let warp = 0;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.min(620, Math.max(260, Math.floor(width * height / 2600)));
+    stars = Array.from({ length: count }, () => createStar(true));
+    comets = Array.from({ length: 7 }, () => createComet(true));
+  }
+
+  function createStar(randomize) {
+    return {
+      x: Math.random() * width,
+      y: Math.random() * height,
+      z: randomize ? Math.random() * 1.8 + .2 : 2,
+      r: Math.random() * 1.7 + .25,
+      a: Math.random() * .72 + .18,
+      hue: Math.random() > .75 ? 190 : 220,
+      drift: Math.random() * .18 + .04
+    };
+  }
+
+  function createComet(randomize) {
+    return {
+      x: randomize ? Math.random() * width : -100,
+      y: randomize ? Math.random() * height * .7 : Math.random() * height * .6,
+      vx: Math.random() * 1.1 + .45,
+      vy: Math.random() * .38 + .12,
+      len: Math.random() * 90 + 80,
+      wait: randomize ? Math.random() * 420 : Math.random() * 260 + 80
+    };
+  }
+
+  function cssColor(name) {
+    return getComputedStyle(root).getPropertyValue(name).trim();
+  }
+
+  function draw(time) {
+    pointer.x += (pointer.tx - pointer.x) * .055;
+    pointer.y += (pointer.ty - pointer.y) * .055;
+    warp *= .95;
+    ctx.clearRect(0, 0, width, height);
+
+    const grad = ctx.createRadialGradient(pointer.x, pointer.y, 0, width * .55, height * .45, Math.max(width, height) * .82);
+    grad.addColorStop(0, "rgba(0,234,255,.08)");
+    grad.addColorStop(.42, "rgba(155,92,255,.055)");
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    const accent = cssColor("--accent") || "#00eaff";
+    const offsetX = (pointer.x / width - .5) * 18;
+    const offsetY = (pointer.y / height - .5) * 14;
+
+    for (const s of stars) {
+      const speed = s.drift + warp * 7 / s.z;
+      s.x += speed * (s.z * .7);
+      s.y += Math.sin(time * .0004 + s.x * .002) * .05 + warp * (s.y - height / 2) * .002;
+      if (s.x > width + 18 || s.y < -18 || s.y > height + 18) Object.assign(s, createStar(false), { x: -12, y: Math.random() * height });
+
+      const px = s.x + offsetX / s.z;
+      const py = s.y + offsetY / s.z;
+      ctx.beginPath();
+      ctx.arc(px, py, s.r / s.z, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${s.hue}, 100%, 82%, ${s.a})`;
+      ctx.fill();
+
+      if (warp > .03) {
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px - warp * 36 / s.z, py);
+        ctx.strokeStyle = `rgba(180,245,255,${Math.min(.42, warp * .32)})`;
+        ctx.lineWidth = Math.max(.5, s.r / s.z);
+        ctx.stroke();
+      }
+    }
+
+    for (let i = 0; i < comets.length; i++) {
+      const c = comets[i];
+      if (c.wait > 0) {
+        c.wait -= 1;
+        continue;
+      }
+      c.x += c.vx + warp * 4;
+      c.y += c.vy;
+      const tail = ctx.createLinearGradient(c.x, c.y, c.x - c.len, c.y - c.len * .25);
+      tail.addColorStop(0, "rgba(255,255,255,.55)");
+      tail.addColorStop(.3, accent.replace(")", ", .32)").replace("rgb", "rgba"));
+      tail.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.strokeStyle = tail;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(c.x, c.y);
+      ctx.lineTo(c.x - c.len, c.y - c.len * .25);
+      ctx.stroke();
+      if (c.x > width + c.len || c.y > height + c.len) comets[i] = createComet(false);
+    }
+
+    drawConstellation(time);
+    requestAnimationFrame(draw);
+  }
+
+  function drawConstellation(time) {
+    const cx = width * .58 + (pointer.x / width - .5) * 20;
+    const cy = height * .48 + (pointer.y / height - .5) * 16;
+    const radius = Math.min(width, height) * .22;
+    const points = 9;
+    ctx.save();
+    ctx.globalAlpha = .2 + Math.sin(time * .001) * .06;
+    ctx.strokeStyle = cssColor("--line-hot") || "rgba(0,234,255,.4)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i <= points; i++) {
+      const a = (i / points) * Math.PI * 2 + time * .00008;
+      const r = radius * (.75 + Math.sin(i * 2.3 + time * .0007) * .08);
+      const x = cx + Math.cos(a) * r;
+      const y = cy + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function activate(key, event) {
+    const data = panels[key];
+    if (!data) return;
+    document.getElementById("consoleKicker").textContent = data.kicker;
+    document.getElementById("consoleTitle").textContent = data.title;
+    document.getElementById("consoleBody").textContent = data.body;
+    document.getElementById("dataStyle").textContent = data.style;
+    document.getElementById("dataState").textContent = data.state;
+    document.getElementById("coreValue").textContent = data.core;
+    document.getElementById("signalValue").textContent = data.signal;
+    document.getElementById("modeValue").textContent = data.mode;
+
+    panelButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.panel === key));
+    nodes.forEach(node => node.classList.toggle("is-active", node.dataset.node === key));
+    warp = Math.max(warp, .42);
+    pulseAt(event?.clientX || window.innerWidth * .68, event?.clientY || window.innerHeight * .46, 12);
+  }
+
+  function cycleTheme(event) {
+    themeIndex = (themeIndex + 1) % themes.length;
+    shell.dataset.theme = themes[themeIndex];
+    const labels = { void: "深空蓝", nova: "恒星金", matrix: "极光绿" };
+    themeBtn.textContent = labels[themes[themeIndex]];
+    warp = .55;
+    pulseAt(event?.clientX || width - 160, event?.clientY || 60, 18);
+  }
+
+  function launch(event) {
+    shell.classList.add("is-warping");
+    warp = 1.25;
+    activate("map", event);
+    document.getElementById("consoleTitle").textContent = "跃迁通道已启动";
+    document.getElementById("consoleBody").textContent = "CCZ 的科幻世界进入展示模式：星图、信标、创作模块和视觉核心全部同步，适合现场展示或个人主页首屏。";
+    pulseAt(event.clientX, event.clientY, 28);
+    window.setTimeout(() => shell.classList.remove("is-warping"), 2200);
+  }
+
+  function focusCore(event) {
+    shell.classList.add("is-warping");
+    warp = .95;
+    activate("craft", event);
+    pulseAt(width * .55, height * .5, 24);
+    window.setTimeout(() => shell.classList.remove("is-warping"), 1500);
+  }
+
+  function pulseAt(x, y, amount) {
+    const burst = document.createElement("span");
+    burst.className = "burst";
+    burst.style.left = `${x}px`;
+    burst.style.top = `${y}px`;
+    document.body.appendChild(burst);
+    window.setTimeout(() => burst.remove(), 720);
+
+    for (let i = 0; i < amount; i++) {
+      const spark = document.createElement("span");
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 32 + Math.random() * 110;
+      spark.className = "spark";
+      spark.style.left = `${x}px`;
+      spark.style.top = `${y}px`;
+      spark.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+      spark.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+      document.body.appendChild(spark);
+      window.setTimeout(() => spark.remove(), 760);
+    }
+  }
+
+  window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener("pointermove", event => {
+    pointer.tx = event.clientX;
+    pointer.ty = event.clientY;
+    if (cursor) {
+      cursor.style.left = `${event.clientX}px`;
+      cursor.style.top = `${event.clientY}px`;
+    }
+  }, { passive: true });
+
+  window.addEventListener("pointerdown", event => {
+    if (!(event.target instanceof HTMLElement)) return;
+    if (event.target.closest("button, a")) return;
+    warp = Math.max(warp, .28);
+    pulseAt(event.clientX, event.clientY, 8);
+  });
+
+  panelButtons.forEach(btn => btn.addEventListener("click", event => activate(btn.dataset.panel, event)));
+  nodes.forEach(node => node.addEventListener("click", event => activate(node.dataset.node, event)));
+  launchBtn.addEventListener("click", launch);
+  focusBtn.addEventListener("click", focusCore);
+  themeBtn.addEventListener("click", cycleTheme);
+
+  resize();
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
