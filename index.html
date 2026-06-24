@@ -1240,6 +1240,110 @@
 </main>
 <div class="cursor" id="cursor" aria-hidden="true"></div>
 
+<!-- ===== Guided Tour ===== -->
+<style>
+  .tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    transition: background .4s;
+  }
+  .tour-overlay.is-dim {
+    background: rgba(0,0,0,.62);
+    backdrop-filter: blur(2px);
+  }
+  .tour-spotlight {
+    position: fixed;
+    z-index: 91;
+    border-radius: 14px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,.68), 0 0 40px rgba(0,234,255,.22);
+    pointer-events: none;
+    transition: all .45s cubic-bezier(.4,0,.2,1);
+  }
+  .tour-tooltip {
+    position: fixed;
+    z-index: 92;
+    max-width: 320px;
+    padding: 20px 22px;
+    border: 1px solid var(--line-hot);
+    border-radius: 12px;
+    background: rgba(4,14,32,.94);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 0 48px rgba(0,234,255,.14);
+    pointer-events: auto;
+    transition: all .4s cubic-bezier(.4,0,.2,1);
+  }
+  .tour-tooltip h3 {
+    margin: 0 0 6px;
+    color: var(--accent);
+    font-size: 14px;
+    letter-spacing: .08em;
+  }
+  .tour-tooltip p {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .tour-tooltip .tour-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: rgba(0,234,255,.14);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+  }
+  .tour-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tour-btn {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: .06em;
+    transition: border-color .2s, background .2s;
+  }
+  .tour-btn:hover { border-color: var(--line-hot); background: rgba(255,255,255,.1); }
+  .tour-btn.is-primary {
+    border-color: var(--line-hot);
+    background: rgba(0,234,255,.14);
+  }
+  .tour-dots {
+    display: flex;
+    gap: 5px;
+    margin-right: auto;
+  }
+  .tour-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.16);
+    transition: background .3s;
+  }
+  .tour-dot.is-active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .tour-skip {
+    border: 0;
+    background: none;
+    color: var(--dim);
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: .08em;
+  }
+  .tour-skip:hover { color: var(--muted); }
+</style>
+
 <script>
 (() => {
   const root = document.documentElement;
@@ -1525,6 +1629,183 @@
   if (launchBtn) launchBtn.addEventListener("click", launch);
   if (focusBtn) focusBtn.addEventListener("click", focusCore);
   if (themeBtn) themeBtn.addEventListener("click", cycleTheme);
+
+
+  // ===== Guided Tour =====
+  const tourSteps = [
+    {
+      title: 'Holo Core · 核心视觉',
+      body: '中央旋转的星球全息图是 CCZ 的个人宇宙。周围环绕着 4 个可交互轨道节点。',
+      target: '.center-stage',
+      position: 'bottom'
+    },
+    {
+      title: 'Orbit Nodes · 交互节点',
+      body: '点击这些节点（01-04）可以切换右侧控制台内容。试试点击不同的数字。',
+      target: '.node.is-active',
+      position: 'left'
+    },
+    {
+      title: 'Command Deck · 模块面板',
+      body: '右侧 4 个模块按钮对应：星际档案、创作引擎、作品星图、联系信标。点击即可切换。',
+      target: '.module-panel',
+      position: 'left'
+    },
+    {
+      title: 'Console · 实时控制台',
+      body: '点击模块后这里会实时更新对应内容，包括标题、描述和技术参数。',
+      target: '.console',
+      position: 'left'
+    },
+    {
+      title: 'Theme Switch · 换频段',
+      body: '点击这里可以在 3 套视觉主题间切换：深空蓝 → 恒星金 → 极光绿。',
+      target: '#themeBtn',
+      position: 'bottom'
+    }
+  ];
+
+  let tourStep = -1;
+  let tourActive = false;
+  let tourOverlay, tourSpotlight, tourTooltip;
+
+  function createTourElements() {
+    tourOverlay = document.createElement('div');
+    tourOverlay.className = 'tour-overlay';
+    
+    tourSpotlight = document.createElement('div');
+    tourSpotlight.className = 'tour-spotlight';
+    
+    tourTooltip = document.createElement('div');
+    tourTooltip.className = 'tour-tooltip';
+    
+    document.body.appendChild(tourOverlay);
+    document.body.appendChild(tourSpotlight);
+    document.body.appendChild(tourTooltip);
+  }
+
+  function updateSpotlight(target) {
+    const el = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!el) {
+      tourSpotlight.style.opacity = '0';
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    tourSpotlight.style.opacity = '1';
+    tourSpotlight.style.left = (rect.left - 8) + 'px';
+    tourSpotlight.style.top = (rect.top - 8) + 'px';
+    tourSpotlight.style.width = (rect.width + 16) + 'px';
+    tourSpotlight.style.height = (rect.height + 16) + 'px';
+  }
+
+  function positionTooltip(targetEl, pos) {
+    const rect = targetEl.getBoundingClientRect();
+    const tipW = 320;
+    let left, top;
+    
+    if (pos === 'bottom') {
+      left = rect.left + rect.width / 2 - tipW / 2;
+      top = rect.bottom + 16;
+    } else if (pos === 'left') {
+      left = rect.left - tipW - 20;
+      top = rect.top + rect.height / 2 - 100;
+    } else if (pos === 'top') {
+      left = rect.left + rect.width / 2 - tipW / 2;
+      top = rect.top - 200;
+    } else {
+      left = rect.right + 20;
+      top = rect.top + rect.height / 2 - 100;
+    }
+    
+    // Clamp to viewport
+    left = Math.max(16, Math.min(left, window.innerWidth - tipW - 16));
+    top = Math.max(16, Math.min(top, window.innerHeight - 200));
+    
+    tourTooltip.style.left = left + 'px';
+    tourTooltip.style.top = top + 'px';
+  }
+
+  function renderTooltip(step) {
+    const s = tourSteps[step];
+    const dots = tourSteps.map((_, i) => 
+      `<span class="tour-dot${i === step ? ' is-active' : ''}"></span>`
+    ).join('');
+    
+    tourTooltip.innerHTML = `
+      <span class="tour-badge">Step ${step + 1} / ${tourSteps.length}</span>
+      <h3>${s.title}</h3>
+      <p>${s.body}</p>
+      <div class="tour-actions">
+        <div class="tour-dots">${dots}</div>
+        <button class="tour-skip" id="tourSkip">跳过</button>
+        <button class="tour-btn" id="tourPrev">‹ 上一步</button>
+        <button class="tour-btn is-primary" id="tourNext">${step === tourSteps.length - 1 ? '完成 ✓' : '下一步 ›'}</button>
+      </div>
+    `;
+    
+    document.getElementById('tourSkip').addEventListener('click', endTour);
+    document.getElementById('tourPrev').addEventListener('click', prevStep);
+    document.getElementById('tourNext').addEventListener('click', nextStep);
+  }
+
+  function showStep(step) {
+    if (step < 0 || step >= tourSteps.length) { endTour(); return; }
+    tourStep = step;
+    const s = tourSteps[step];
+    const el = document.querySelector(s.target);
+    if (!el) { nextStep(); return; }
+    
+    tourOverlay.classList.add('is-dim');
+    updateSpotlight(el);
+    positionTooltip(el, s.position);
+    renderTooltip(step);
+    tourTooltip.style.opacity = '1';
+  }
+
+  function nextStep() {
+    if (tourStep >= tourSteps.length - 1) { endTour(); return; }
+    showStep(tourStep + 1);
+  }
+
+  function prevStep() {
+    if (tourStep <= 0) return;
+    showStep(tourStep - 1);
+  }
+
+  function endTour() {
+    tourActive = false;
+    tourOverlay.classList.remove('is-dim');
+    tourSpotlight.style.opacity = '0';
+    tourTooltip.style.opacity = '0';
+    window.setTimeout(() => {
+      tourOverlay.remove();
+      tourSpotlight.remove();
+      tourTooltip.remove();
+    }, 500);
+    try { localStorage.setItem('ccz-tour-done', '1'); } catch(e) {}
+  }
+
+  function startTour() {
+    if (tourActive) return;
+    try { if (localStorage.getItem('ccz-tour-done')) return; } catch(e) {}
+    tourActive = true;
+    createTourElements();
+    window.setTimeout(() => showStep(0), 600);
+  }
+
+  // Add a "?" button to restart tour
+  const restartBtn = document.createElement('button');
+  restartBtn.textContent = '?';
+  restartBtn.style.cssText = 'position:fixed;z-index:85;bottom:20px;right:20px;width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:rgba(4,14,32,.8);color:var(--accent);font-size:16px;font-weight:800;cursor:pointer;backdrop-filter:blur(10px);pointer-events:auto;';
+  restartBtn.title = '重新播放引导';
+  restartBtn.addEventListener('click', () => {
+    try { localStorage.removeItem('ccz-tour-done'); } catch(e) {}
+    startTour();
+  });
+  document.body.appendChild(restartBtn);
+
+  // Auto-start tour on first visit
+  window.setTimeout(startTour, 1200);
 
   resize();
   requestAnimationFrame(draw);
